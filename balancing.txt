@@ -1,0 +1,324 @@
+#include <stdio.h>
+#include <iostream>
+#include <process.h>
+#include <math.h>
+
+using namespace std;
+
+const double pi = 3.14159265359;
+
+
+void calcR_0(double F1, double F2, double &R1, double &R2, double w, double H, double L) {
+	
+	R2 = (H*F1 + (H + w)*F2) / L;
+	R1 = ((H + L)*F1 + (H + w + L)*F2) / L;
+
+	cout << "(R1;R2) = (" << R1 << ";" << R2 << ")" << endl;
+
+	cout << "calcR_0: sum(F)=" << F1 + F2 + R2 - R1 << endl;
+	cout << "calcR_0: sum(M(R1))=" << -L*R1 + (H + L)*F1 + (w + H + L)*F2 << endl;
+	cout << "calcR_0: sum(M(R2))=" << -L*R2 + H*F1 + (w + H)*F2 << endl;
+
+}
+
+void selftest() {
+
+	double	k1 = 0.005;		double	c1 = 500;	double	k2 = 0.003;		double	c2 = 300;
+
+	double m = 0.1;		double n = 3.6;		double r = 0.178;
+
+	double	F = m*n*n*r;	double w = 0.8;		double H = 0.2;		double L = 0.3;
+
+	double	alpha = 0;
+
+	double	F12x = F*cos(alpha);	double F12y = F*sin(alpha);
+
+	double	F23x = -F*cos(alpha);	double F23y = -F*sin(alpha);
+
+	double R11, R12, R13, R21, R22, R23;
+
+	cout << "1 experement:" << endl;
+	calcR_0(0, 0, R11, R21, w, H, L);
+
+	cout << "2 experement:" << endl;
+	calcR_0(F12x, 0, R12, R22, w, H, L);
+
+	cout << "3 experement:" << endl;
+	calcR_0(0, F23x, R13, R23, w, H, L);
+
+	cout << endl;
+	cout << endl;
+	cout << endl;
+
+	double t11 = (R11 - c1) / k1;		double t21 = (R21 - c2) / k2;
+	double t12 = (R12 - c1) / k1;		double t22 = (R22 - c2) / k2;
+	double t13 = (R13 - c1) / k1;		double t23 = (R23 - c2) / k2;
+
+	double ax = (t22 - t21) / (t23 - t21);
+
+	double H2 = w / (F12x/(F23x*ax)-1);
+
+	double k12 = (H2 + w + L)*F23x / (L*(t13 - t11));	double k22 = (H2 + w)*F23x / (L*(t23 - t21));
+
+	double c12 = -k12*t11;		double c22 = -k22*t21;
+
+	double eps = 0.0000001;
+	if (((H - H2) < eps) && ((k1 - k12) < eps) && ((k2 - k22) < eps) && ((c1 - c12) < eps) && ((c2 - c22) < eps))
+	{
+		cout << "ok" << endl;
+	}
+	else {
+		cout << "fail";
+	}
+
+	cin >> H;
+}
+
+void Povorot(int j, double &x, double &y) {
+	double r = sqrt(x*x + y*y);
+	double phi = atan2(y, x);
+	phi += j*pi/180;
+	x = r*cos(phi);	y = r*sin(phi);
+}
+
+double sum_F(double R1, double R2, double F1, double F2) {
+	return R2-R1+F1+F2;
+}
+
+double sum_M1(double R2, double F1, double F2, double w, double L, double H) {
+	return  L*R2 - F1*H - F2*(w + H);;
+}
+
+double sum_M2(double R1, double F1, double F2, double w, double L, double H) {
+	return L*R1 - F1*(H+L) - F2*(w + H + L);;
+}
+
+double Max_3(double a, double b, double c) {
+	if (a > b) {
+		if (a > c) {
+			return a;
+		}
+		else {
+			return c;
+		}
+	}
+	else
+	{
+		if (b > c) {
+			return b;
+		}
+		else {
+			return c;
+		}
+	}
+}
+
+double result(int i, int j) {
+
+	double	k1x(0), c1x(0), k2x(0), c2x(0), Hx(0);
+	double	k1y(0), c1y(0), k2y(0), c2y(0), Hy(0);
+
+	double m = 0.1;
+	double n = 3.6, r = 0.178, w = 0.8, L = 0.3;
+	double f = m*n*n*r;
+	double alpha(0),betta(0);
+	alpha = i*pi / 180+0.0000001;//при i==0
+	betta = j*pi / 180+0.0000001;//при j==0
+
+
+	double H;
+	double	F12x(0), F12y(0), F23x(0), F23y(0);
+
+	F12x = f*cos(alpha);	F12y = f*sin(alpha);
+
+	F23x = -f*cos(alpha);	F23y = -f*sin(alpha);
+
+	double R11(0), R12(0), R13(0), R21(0), R22(0), R23(0);
+
+
+	double 	t11x = -222.089294;		double 	t21x = 542.357666;
+	double 	t12x = -131.495804;		double 	t22x = -18604.378906;
+	double 	t13x = -6884.020996;	double 	t23x = 28942.300781;
+
+	double 	t11y = 105.669968;		double 	t21y = 167.123535;
+	double 	t12y = 55.797054;		double 	t22y = 1623.249512;
+	double 	t13y = 509.127899;		double 	t23y = -1898.519409;
+
+	Povorot(j, t21x, t21y);
+	Povorot(j, t22x, t22y);
+	Povorot(j, t23x, t23y);
+
+	double ax = (t22x - t21x) / (t23x - t21x);
+	double ay = (t22y - t21y) / (t23y - t21y);
+
+	Hx = w / (F12x / (F23x*ax) - 1);
+
+	
+
+	k1x = (Hx + w + L)*F23x / (L*(t13x - t11x));		k2x = (Hx + w)*F23x / (L*(t23x - t21x));
+
+	c1x = -k1x*t11x;									c2x = -k2x*t21x;
+
+	Hy = w / (F12y / (F23y*ay) - 1);
+
+	
+	k1y = (Hy + w + L)*F23y / (L*(t13y - t11y));		k2y = (Hy + w)*F23y / (L*(t23y - t21y));
+
+	c1y = -k1y*t11y;									c2y = -k2y*t21y;
+
+	H = sqrt(abs(Hx*Hy));// Hx,Hy могут принимать значение < 0
+	double s_F(0), s_M1(0), s_M2(0); // M1 - момент сил относительно R1,  M2 - момент сил относительно R2
+
+	double R[2][6];//1-я строка х, 2-я строка y
+	double F[2][6];//1-я строка х, 2-я строка y
+	
+
+	//1-й датчик
+	R[0][0] = k1x*t11x + c1x;	R[1][0] = k1y*t11y + c1y;	//1-ый эксперимент
+
+	R[0][1] = k1x*t12x + c1x;	R[1][1] = k1y*t12y + c1y;	//2-ый эксперимент
+
+	R[0][2] = k1x*t13x + c1x;	R[1][2] = k1y*t13y + c1y;	//3-ый эксперимент
+
+
+	//2-й датчик
+	R[0][3] = k2x*t21x + c1x;	R[1][3] = k2y*t21y + c2y;	//1-ый эксперимент
+
+	R[0][4] = k2x*t22x + c1x;	R[1][4] = k2y*t22y + c2y;	//2-ый эксперимент
+
+	R[0][5] = k2x*t23x + c1x;	R[1][5] = k2y*t23y + c2y;	//3-ый эксперимент
+
+
+	//Приложение силы к точке А
+	F[0][0] = 0;		F[1][0] = 0;	//1-ый эксперимент
+
+	F[0][1] = F12x;		F[1][1] = F12y;	//2-ый эксперимент
+
+	F[0][2] = 0;		F[1][2] = 0;	//3-ый эксперимент
+
+
+	//Приложение силы к точке B
+	F[0][3] = 0;		F[1][3] = 0;	//1-ый эксперимент
+
+	F[0][4] = 0;		F[1][4] = 0;	//2-ый эксперимент
+
+	F[0][5] = F23x;		F[1][5] = F23y;	//3-ый эксперимент
+	
+	double max = (0);
+	for (int k = 0; k < 2; k++)
+	{
+		for (int l = 0; l < 3; l++)
+		{
+			s_F = sum_F(R[k][l], R[k][l + 3], F[k][l], F[k][l + 3]);	//R1, R2, F1, F2
+
+			s_M1 = sum_M1(R[k][l + 3], F[k][l], F[k][l + 3], w, L, H);	//R2, F1, F2, w, L, H
+
+			s_M2 = sum_M2(R[k][l], F[k][l], F[k][l + 3], w, L, H);	//R1, F1, F2, w, L, H
+
+			double local_max = Max_3(abs(s_F), abs(s_M1), abs(s_M2));
+						
+			
+			if (local_max > max) max = local_max;
+		}
+	}
+	
+	return max;
+}
+
+double Get_H(int i, int j) {
+
+	
+	//Известные данные
+	double m = 0.1;	
+	double n = 3.6, r = 0.178, w = 0.8, L = 0.3;
+
+	double H;
+	double	k1x(0), c1x(0), k2x(0), c2x(0), Hx(0);
+	double	k1y(0), c1y(0), k2y(0), c2y(0), Hy(0);
+	
+	double f = m*n*n*r;
+	double alpha(0),betta(0);
+	alpha = i*pi / 180+0.0000001;//при i==0
+	betta = j*pi / 180+0.0000001;//при j==0
+
+	double	F12x(0), F12y(0), F23x(0), F23y(0);
+
+	F12x = f*cos(alpha);	F12y = f*sin(alpha);
+
+	F23x = -f*cos(alpha);	F23y = -f*sin(alpha);
+
+	double R11(0), R12(0), R13(0), R21(0), R22(0), R23(0);
+
+
+	double 	t11x = -222.089294;		double 	t21x = 542.357666;
+	double 	t12x = -131.495804;		double 	t22x = -18604.378906;
+	double 	t13x = -6884.020996;	double 	t23x = 28942.300781;
+
+	double 	t11y = 105.669968;		double 	t21y = 167.123535;
+	double 	t12y = 55.797054;		double 	t22y = 1623.249512;
+	double 	t13y = 509.127899;		double 	t23y = -1898.519409;
+
+	Povorot(j, t21x, t21y);
+	Povorot(j, t22x, t22y);
+	Povorot(j, t23x, t23y);
+
+	double ax = (t22x - t21x) / (t23x - t21x);
+	double ay = (t22y - t21y) / (t23y - t21y);
+
+	Hx = w / (F12x / (F23x*ax) - 1);
+
+	k1x = (Hx + w + L)*F23x / (L*(t13x - t11x));		k2x = (Hx + w)*F23x / (L*(t23x - t21x));
+
+	c1x = -k1x*t11x;									c2x = -k2x*t21x;
+
+	Hy = w / (F12y / (F23y*ay) - 1);
+
+	
+	k1y = (Hy + w + L)*F23y / (L*(t13y - t11y));		k2y = (Hy + w)*F23y / (L*(t23y - t21y));
+
+	c1y = -k1y*t11y;									c2y = -k2y*t21y;
+
+	H = sqrt(abs(Hx*Hy));// Hx,Hy могут принимать значение < 0
+	
+	return H;
+}
+
+void calibrate() {
+	
+	double max(0), min(1000);	int Im, Jm;
+
+
+	for (int i = 0; i < 360; i++)
+	{
+		for (int j = 0; j < 360; j++)
+		{
+			max = result(i, j);
+			
+			if (max < min) { 
+				min = max;
+				Im = i;
+				Jm = j;
+			}
+		}
+	}
+	double w = 0.8;
+	double n = 3.6, r = 0.178;
+	double m = 0.1;
+	double f = m*n*n*r;
+
+	cout << "f*(w+H)=" << f*(w+Get_H(Im,Jm)) << endl; // порядок моментов сил
+	cout << "f=" << f << endl; // порядок сил
+	cout << "min=" << min << endl; // min сумма моментов сил, сумма сил 
+	cout << "Im=" << Im << endl;
+	cout << "Jm=" << Jm << endl;
+	cin >> min;
+}
+
+ 
+int main() {
+	
+	//selftest();
+
+	calibrate();
+
+}
